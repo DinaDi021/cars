@@ -1,0 +1,13 @@
+.Header{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 10vh;
+    background-color: lightseagreen;
+    color: white;
+}
+
+.Header a{
+    text-decoration: none;
+    color: inherit;
+}
