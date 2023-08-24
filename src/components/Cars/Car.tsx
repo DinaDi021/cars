@@ -18,13 +18,17 @@ const Car: FC<IProps> = ({car}) => {
         await dispatch(carActions.deleteCar({id}))
     };
 
+    const getDetails = () => {
+        navigate(`cars/${id}`, { state: car });
+    }
+
     return (
         <div>
             <div>id: {id}</div>
             <div>brand: {brand}</div>
             <button onClick={()=>dispatch(carActions.setCarForUpdate({car}))}>update</button>
             <button onClick={deleteCar}>delete</button>
-            <button onClick={() => navigate(id.toString(), {state: car})}>details</button>
+            <button onClick={getDetails}>details</button>
         </div>
     );
 };

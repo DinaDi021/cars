@@ -1,11 +1,14 @@
 import {FC, PropsWithChildren} from 'react';
 import {ICar} from "../../interfaces";
+import {useAppLocation} from "../../hooks";
 
 interface IProps extends PropsWithChildren {
-    car: ICar
 }
 
-const CarDetails: FC<IProps> = ({car}) => {
+const CarDetails: FC<IProps> = () => {
+
+    const location = useAppLocation<{ car: ICar }>();
+    const car = location.state.car;
     const {id, brand, price, year} = car;
 
     return (

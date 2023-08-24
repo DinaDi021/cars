@@ -1,15 +1,11 @@
-import {FC, PropsWithChildren} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
 import {useNavigate} from "react-router";
+
 import {IAuth} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks";
 import {authActions} from "../../redux";
 
-interface IProps extends PropsWithChildren {
-
-}
-
-const LoginForm: FC<IProps> = () => {
+const LoginForm= () => {
     const {register, reset, handleSubmit} = useForm<IAuth>();
     const {errors} = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch();
