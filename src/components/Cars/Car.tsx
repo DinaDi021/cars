@@ -19,7 +19,7 @@ const Car: FC<IProps> = ({car}) => {
     };
 
     const getDetails = () => {
-        navigate(`cars/${id}`, { state: car });
+        navigate(`${id}`, { state: car });
     }
 
     return (
