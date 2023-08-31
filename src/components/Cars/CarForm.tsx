@@ -1,6 +1,7 @@
 import {FC, PropsWithChildren} from 'react';
-
+import {useSearchParams} from "react-router-dom";
 import {SubmitHandler, useForm} from "react-hook-form";
+
 import {ICar} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks";
 import {carActions} from "../../redux";
@@ -11,8 +12,10 @@ interface IProps extends PropsWithChildren {
 
 const CarForm: FC<IProps> = () => {
     const {reset, register, handleSubmit, setValue} = useForm<ICar>();
-    const {carForUpdate} = useAppSelector(state => state.cars);
+    const {carForUpdate, total_items, currentSize} = useAppSelector(state => state.cars);
     const dispatch = useAppDispatch();
+    const [, setQuery] = useSearchParams();
+
 
     if (carForUpdate) {
         setValue('brand', carForUpdate.brand)
@@ -23,6 +26,11 @@ const CarForm: FC<IProps> = () => {
     const save: SubmitHandler<ICar> = async (car) => {
         await dispatch(carActions.create({car}))
         reset()
+        const lastPage = Math.ceil((total_items+1)/currentSize);
+        setQuery(prev => {
+            prev.set('page',lastPage.toString())
+            return prev
+        })
     };
 
     const update: SubmitHandler<ICar> = async (car) => {

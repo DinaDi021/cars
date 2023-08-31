@@ -3,23 +3,31 @@ import {AxiosError} from "axios";
 
 import {ICar, IPagination} from "../../interfaces";
 import {carService} from "../../services";
+import {RootState} from "../store";
 
 interface IState {
     cars: ICar[],
-    carForUpdate: ICar | null
+    carForUpdate: ICar | null,
+    total_items: number,
+    currentPage: number,
+    currentSize: number
 }
 
 const initialState: IState = {
     cars: [],
-    carForUpdate: null
+    carForUpdate: null,
+    total_items: null,
+    currentPage: null,
+    currentSize: null
 };
 
-const getAll = createAsyncThunk<IPagination<ICar>, void>(
+const getAll = createAsyncThunk<{ data: IPagination<ICar>, page: number, size: number },
+    { page: number, size: number }>(
     'carsSlice/getAll',
-    async (_, {rejectWithValue}) => {
+    async ({page, size}, {rejectWithValue}) => {
         try {
-            const {data} = await carService.getAll();
-            return data
+            const {data} = await carService.getAll(page, size);
+            return {data, page, size}
         } catch (e) {
             const err = e as AxiosError
             return rejectWithValue(err.response.data)
@@ -32,7 +40,6 @@ const create = createAsyncThunk<void, { car: ICar }>(
     async ({car}, {rejectWithValue, dispatch}) => {
         try {
             await carService.create(car)
-            dispatch(getAll())
         } catch (e) {
             const err = e as AxiosError
             return rejectWithValue(err.response.data)
@@ -40,12 +47,12 @@ const create = createAsyncThunk<void, { car: ICar }>(
     }
 )
 
-const update = createAsyncThunk<void, { id: number, car: ICar }>(
+const update = createAsyncThunk<ICar, { id: number, car: ICar }>(
     'carsSlice/update',
     async ({id, car}, {rejectWithValue, dispatch}) => {
         try {
-            await carService.updateById(id, car)
-            await dispatch(getAll())
+            const {data} = await carService.updateById(id, car)
+            return data
         } catch (e) {
             const err = e as AxiosError
             return rejectWithValue(err.response.data)
@@ -55,10 +62,11 @@ const update = createAsyncThunk<void, { id: number, car: ICar }>(
 
 const deleteCar = createAsyncThunk<void, { id: number }>(
     'carsSlice/deleteCar',
-    async ({id}, {rejectWithValue, dispatch}) => {
+    async ({id}, {rejectWithValue, dispatch, getState}) => {
         try {
             await carService.deleteById(id)
-            await dispatch(getAll())
+            const {cars: {currentPage, currentSize}} = getState() as RootState;
+            dispatch(getAll({page: currentPage, size: currentSize}))
         } catch (e) {
             const err = e as AxiosError
             return rejectWithValue(err.response.data)
@@ -76,10 +84,21 @@ const carsSlice = createSlice({
     },
     extraReducers: builder => builder
         .addCase(getAll.fulfilled, (state, action) => {
-            state.cars = action.payload.items
+            state.cars = action.payload.data.items
+            state.total_items = action.payload.data.total_items
+            state.currentPage = action.payload.page
+            state.currentSize = action.payload.size
+
         })
-        .addCase(update.fulfilled, state => {
+        .addCase(update.fulfilled, (state, action) => {
             state.carForUpdate = null
+            const updatedCar = action.payload
+            const find = state.cars.find(car=>car.id ===updatedCar.id);
+            Object.assign(find, updatedCar)
+
+        })
+        .addCase(create.fulfilled,state => {
+            state.total_items +=1
         })
 })
 

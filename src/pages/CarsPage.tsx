@@ -1,7 +1,8 @@
 import React from 'react';
 import {Outlet} from "react-router";
 
-import {CarForm, Cars} from "../components";
+import {CarForm, Cars, Pagination} from "../components";
+
 
 const CarsPage = () => {
     return (
@@ -9,6 +10,7 @@ const CarsPage = () => {
             <Outlet/>
             <CarForm/>
             <Cars/>
+            <Pagination/>
         </div>
     );
 };

@@ -4,14 +4,19 @@ import {useAppDispatch, useAppSelector} from "../../hooks";
 import {authService} from "../../services";
 import {authActions} from "../../redux";
 import styles from './Header.module.css'
+import {useEffect} from "react";
 
 const Header = () => {
     const {me} = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch();
 
-    if (authService.getAccessToken() && !me) {
-        dispatch(authActions.me())
-    }
+
+    useEffect(() => {
+        if (authService.getAccessToken() && !me) {
+            dispatch(authActions.me())
+        }
+    }, [])
+
 
     return (
         <div className={styles.Header}>
