@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, isFulfilled, isPending, isRejected, PayloadAction} from "@reduxjs/toolkit";
 import {AxiosError} from "axios";
 
 import {ICar, IPagination} from "../../interfaces";
@@ -10,7 +10,8 @@ interface IState {
     carForUpdate: ICar | null,
     total_items: number,
     currentPage: number,
-    currentSize: number
+    currentSize: number,
+    errors: any
 }
 
 const initialState: IState = {
@@ -18,7 +19,8 @@ const initialState: IState = {
     carForUpdate: null,
     total_items: null,
     currentPage: null,
-    currentSize: null
+    currentSize: null,
+    errors: null
 };
 
 const getAll = createAsyncThunk<{ data: IPagination<ICar>, page: number, size: number },
@@ -95,10 +97,18 @@ const carsSlice = createSlice({
             const updatedCar = action.payload
             const find = state.cars.find(car=>car.id ===updatedCar.id);
             Object.assign(find, updatedCar)
-
         })
         .addCase(create.fulfilled,state => {
             state.total_items +=1
+        })
+        .addMatcher(isPending(), state => {
+            state.errors = null
+        })
+        .addMatcher(isFulfilled(), state => {
+            state.errors = null
+        })
+        .addMatcher(isRejected(), (state, action) => {
+            state.errors = action.payload
         })
 })
 
